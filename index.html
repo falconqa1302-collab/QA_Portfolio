@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Rishabh Solanki — Quality Assurance Engineer</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --void:#030308;
+    --deep:#080a1c;
+    --panel: rgba(15,20,48,0.55);
+    --border: rgba(139,124,255,0.16);
+    --border-bright: rgba(139,124,255,0.45);
+    --accretion:#ff8a4c;
+    --accretion-hot:#ffe3b0;
+    --nebula:#8b7cff;
+    --signal:#5ce1e6;
+    --text:#f1efff;
+    --text-muted:#9391b3;
+    --text-dim:#605d82;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--void);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--nebula); color:var(--void); }
+  a{ color:inherit; }
+  svg.defs-only{ position:absolute; width:0; height:0; overflow:hidden; }
+
+  #stars-canvas{ position:fixed; top:0; left:0; width:100%; height:100%; z-index:-3; display:block; }
+  .veil{
+    position:fixed; inset:0; z-index:-2;
+    background:radial-gradient(ellipse at 50% -10%, rgba(139,124,255,0.10), transparent 55%),
+               radial-gradient(ellipse at 90% 110%, rgba(92,225,230,0.06), transparent 50%);
+    pointer-events:none;
+  }
+
+  .container{ max-width:1100px; margin:0 auto; padding:0 32px; }
+  section{ position:relative; padding:92px 0; }
+
+  .eyebrow{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.28em; text-transform:uppercase;
+    color:var(--signal); display:flex; align-items:center; gap:12px; margin-bottom:22px;
+  }
+  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--signal); opacity:0.6; }
+
+  h2.section-title{
+    font-family:var(--font-display); font-weight:600; font-size:clamp(28px, 4vw, 44px);
+    letter-spacing:-0.01em; margin-bottom:18px; color:var(--text);
+  }
+  .section-lede{ max-width:600px; color:var(--text-muted); font-size:16px; margin-bottom:34px; }
+
+  /* ============ REAL PLANET / ICON SYSTEM ============ */
+  /* Earth + Moon use real NASA-derived imagery (threejs.org official texture assets,
+     sourced from NASA Blue Marble / Clementine data). Mars & Neptune are rendered
+     procedurally at vector resolution (SVG turbulence) tuned to each planet's real
+     coloring and banding, so they stay crisp at any size. */
+
+  .earth-icon{
+    display:inline-block;
+    border-radius:50%;
+    background-image:url('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+    background-size:240% 100%;
+    background-position:0% 50%;
+    box-shadow:inset -2px -2px 4px rgba(0,0,0,0.6), inset 1px 1px 2px rgba(255,255,255,0.35);
+    animation:earth-spin 26s linear infinite;
+    flex-shrink:0;
+  }
+  @keyframes earth-spin{ from{ background-position:0% 50%; } to{ background-position:100% 50%; } }
+
+  .moon-icon{
+    border-radius:50%;
+    background-image:url('https://threejs.org/examples/textures/planets/moon_1024.jpg');
+    background-size:220% 100%;
+    background-position:0% 50%;
+    box-shadow:inset -3px -3px 6px rgba(0,0,0,0.65), inset 1px 1px 2px rgba(255,255,255,0.25);
+    animation:earth-spin 40s linear infinite;
+  }
+
+  .globe{ position:relative; border-radius:50%; overflow:hidden; }
+  .globe .g-texture{ position:absolute; inset:0; }
+  .globe .g-shade{
+    position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 32% 28%, rgba(255,255,255,0.18), transparent 42%),
+               radial-gradient(circle at 68% 78%, rgba(0,0,0,0.55), transparent 60%),
+               radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,0.55) 100%);
+  }
+  .globe .g-rim{
+    position:absolute; inset:-6px; border-radius:50%; pointer-events:none;
+  }
+
+  /* Earth globe (large, real texture, two layers: surface + clouds) */
+  .globe-earth .g-texture{
+    background-image:url('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+    background-size:260% 100%;
+    animation:earth-spin 34s linear infinite;
+  }
+  .globe-earth .g-clouds{
+    position:absolute; inset:0;
+    background-image:url('https://threejs.org/examples/textures/planets/earth_clouds_1024.png');
+    background-size:260% 100%;
+    opacity:0.55;
+    mix-blend-mode:screen;
+    animation:earth-spin 22s linear infinite;
+  }
+  .globe-earth .g-rim{ box-shadow:0 0 50px 6px rgba(92,170,255,0.35); }
+
+  /* Mars globe (procedural, vector-resolution) */
+  .globe-mars .g-texture{ background:#c1571f; }
+  .globe-mars .g-texture svg{ position:absolute; inset:-25%; width:150%; height:150%; animation:slow-spin 55s linear infinite; }
+  .globe-mars::before, .globe-mars::after{
+    content:''; position:absolute; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.85), transparent 70%);
+    filter:blur(1px); z-index:2;
+  }
+  .globe-mars::before{ width:34%; height:16%; top:2%; left:33%; opacity:0.8; }
+  .globe-mars::after{ width:26%; height:12%; bottom:3%; left:38%; opacity:0.55; }
+  .globe-mars .g-rim{ box-shadow:0 0 46px 4px rgba(255,120,60,0.3); }
+
+  /* Neptune globe (procedural, vector-resolution) */
+  .globe-neptune .g-texture{ background:#1c4f8f; }
+  .globe-neptune .g-texture svg{ position:absolute; inset:-25%; width:150%; height:150%; animation:slow-spin 70s linear infinite reverse; }
+  .globe-neptune .g-rim{ box-shadow:0 0 46px 4px rgba(92,170,255,0.4); }
+
+  @keyframes slow-spin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+
+  /* ============ NAV ============ */
+  #orbit-nav{ position:fixed; right:28px; top:50%; transform:translateY(-50%); z-index:50; display:flex; flex-direction:column; gap:22px; }
+  #orbit-nav a{ display:block; position:relative; width:14px; height:14px; }
+  #orbit-nav a .earth-icon{ width:14px; height:14px; opacity:0.45; transition:opacity .3s ease, transform .3s ease; }
+  #orbit-nav a::after{
+    content:attr(data-label); position:absolute; right:26px; top:50%; transform:translateY(-50%);
+    font-family:var(--font-mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase;
+    color:var(--text-muted); white-space:nowrap; opacity:0; transition:opacity .25s ease; pointer-events:none;
+  }
+  #orbit-nav a:hover::after{ opacity:1; }
+  #orbit-nav a.active .earth-icon{ opacity:1; transform:scale(1.35); box-shadow:0 0 0 4px rgba(92,225,230,0.15), 0 0 16px rgba(92,225,230,0.8), inset -2px -2px 4px rgba(0,0,0,0.6); }
+  @media (max-width: 860px){ #orbit-nav{ display:none; } }
+
+  /* ============ HERO ============ */
+  #hero{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:100px 0 80px; text-align:center; position:relative; perspective:1400px;
+    overflow:hidden;
+  }
+  #blackhole-wrap{
+    position:absolute; top:52%; left:50%;
+    width:min(1800px, 185vw); height:min(1800px, 185vw);
+    transform:translate(-50%,-46%);
+    z-index:0; pointer-events:none;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  #blackhole-canvas{ width:100%; height:100%; display:block; filter:saturate(1.08); }
+  .hero-inner{ position:relative; z-index:2; width:min(900px,100%); margin:0 auto; }
+  .hero-tag{ font-family:var(--font-mono); font-size:12px; letter-spacing:0.3em; text-transform:uppercase; color:var(--signal); margin-bottom:28px; opacity:0.9; }
+  h1.hero-name{
+    font-family:var(--font-display); font-weight:700; font-size:clamp(42px, 8vw, 96px);
+    letter-spacing:-0.02em; line-height:1;
+    background:linear-gradient(180deg, #ffffff 0%, #d9d4ff 55%, #a89bff 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 80px rgba(139,124,255,0.35);
+  }
+  .hero-role{ font-family:var(--font-display); font-size:clamp(16px, 2.4vw, 22px); color:var(--text-muted); margin-top:18px; font-weight:500; }
+  /* legibility backdrop: keeps the paragraph + stats readable no matter how the
+     black hole render lands behind them, without hiding the effect itself */
+  .hero-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:28px;position:relative;z-index:3;}
+  .hero-btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 18px;border:1px solid var(--border-bright);border-radius:999px;color:var(--text);text-decoration:none;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:rgba(8,6,18,.58);transition:transform .25s ease,border-color .25s ease,background .25s ease;}
+  .hero-btn:hover{transform:translateY(-2px);border-color:var(--signal);background:rgba(92,225,230,.08);}
+  .hero-btn.primary{background:rgba(139,124,255,.16);border-color:rgba(139,124,255,.65);}
+  .hero-objective{
+    max-width:650px; margin:26px auto 0; color:var(--text-muted); font-size:15px;
+    position:relative; z-index:2; padding:14px 18px; border-radius:16px;
+    background:rgba(5,3,10,0.38); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .hero-inner::before{ content:""; position:absolute; inset:18% -6% -8%; z-index:-1; border-radius:50%; background:radial-gradient(ellipse at center, rgba(3,3,8,.52) 0%, rgba(3,3,8,.24) 48%, transparent 76%); pointer-events:none; }
+  .hero-stats{
+    display:flex; gap:28px; justify-content:center; margin-top:30px; flex-wrap:wrap;
+    position:relative; z-index:2; padding:14px 22px; border-radius:16px;
+    background:rgba(5,3,10,0.38); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+  }
+  .hero-stat b{ display:block; font-family:var(--font-display); font-size:26px; color:var(--accretion-hot); }
+  .hero-stat span{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); }
+
+  /* on narrow screens the 210vw sizing over-zooms the sphere into the text stack --
+     scale it down and drop it lower so it reads as a backdrop, not an overlay */
+  @media (max-width:700px){
+    #hero{ padding-top:120px; }
+    #blackhole-wrap{ width:min(1100px, 150vw); height:min(1100px, 150vw); top:60%; }
+    .hero-objective, .hero-stats{ background:rgba(5,3,10,0.55); }
+  }
+
+  .hero-actions-bottom{margin-top:26px;}
+  .scroll-cue{ margin-top:70px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--text-dim); display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .scroll-cue .line{ width:1px; height:34px; background:linear-gradient(var(--signal), transparent); animation:pulse-line 2s ease-in-out infinite; }
+  @keyframes pulse-line{ 0%,100%{opacity:.3;} 50%{opacity:1;} }
+
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ============ ABOUT ============ */
+  #about .about-grid{ display:grid; grid-template-columns: 1.3fr 1fr; gap:34px; align-items:start; }
+  #about p{ color:var(--text-muted); font-size:16px; margin-bottom:18px; }
+  #about p b{ color:var(--text); font-weight:600; }
+  .locator{ border:1px solid var(--border); border-radius:16px; padding:26px; background:var(--panel); backdrop-filter:blur(6px); }
+  .locator-row{ display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px dashed var(--border); font-family:var(--font-mono); font-size:12.5px; gap:14px; }
+  .locator-row:last-child{ border-bottom:none; }
+  .locator-row span:first-child{ color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; display:flex; align-items:center; gap:8px; }
+  .locator-row span:last-child{ color:var(--signal); text-align:right; }
+  @media (max-width: 760px){ #about .about-grid{ grid-template-columns:1fr; } }
+
+  /* ============ SKILLS — ANIMATED ORBITAL CONSTELLATION SYSTEM ============ */
+  .constellations{ display:grid; grid-template-columns:repeat(2, 1fr); gap:18px; }
+  @media (max-width:760px){ .constellations{ grid-template-columns:1fr; } }
+  .constellation-card{
+    position:relative; border:1px solid var(--border); border-radius:18px; padding:24px 22px 10px;
+    background:var(--panel); backdrop-filter:blur(6px); overflow:hidden;
+    transition:border-color .3s ease, transform .3s ease, box-shadow .3s ease;
+  }
+  .constellation-card:hover{ border-color:var(--border-bright); transform:translateY(-3px); box-shadow:0 20px 44px rgba(10,6,28,0.4); }
+  .constellation-card h3{ font-family:var(--font-display); font-size:16px; font-weight:600; margin-bottom:4px; color:var(--text); position:relative; z-index:2; }
+  .constellation-card .cluster-label{ font-family:var(--font-mono); font-size:10px; color:var(--text-dim); letter-spacing:0.15em; text-transform:uppercase; display:block; margin-bottom:14px; position:relative; z-index:2; }
+
+  .orbit-stage{ position:relative; }
+  .orbit-stage svg{ width:100%; height:auto; display:block; position:relative; z-index:2; overflow:visible; }
+
+  /* slow rotating radar-sweep light washing across the whole diagram */
+  .radar-sweep{
+    position:absolute; inset:-15% -6%; z-index:1; pointer-events:none; border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(92,225,230,0.16), transparent 20%, transparent 80%, rgba(139,124,255,0.14));
+    mix-blend-mode:screen; opacity:0.75;
+    animation:radar-spin 10s linear infinite;
+  }
+  @keyframes radar-spin{ to{ transform:rotate(360deg); } }
+
+  .orbit-ring{ fill:none; }
+  .ring-a{ stroke:rgba(139,124,255,0.32); stroke-dasharray:2 9; animation:dash-spin-fwd 26s linear infinite; }
+  .ring-b{ stroke:rgba(92,225,230,0.2); stroke-dasharray:1 8; animation:dash-spin-rev 38s linear infinite; }
+  @keyframes dash-spin-fwd{ to{ stroke-dashoffset:-500; } }
+  @keyframes dash-spin-rev{ to{ stroke-dashoffset:500; } }
+
+  .core-halo{ transform-box:fill-box; transform-origin:center; animation:core-pulse 3.2s ease-in-out infinite; }
+  @keyframes core-pulse{ 0%,100%{ transform:scale(1); opacity:0.55; } 50%{ transform:scale(1.4); opacity:0.95; } }
+  .core-dot{ fill:#050308; }
+  .core-ring{ fill:none; stroke-width:2.6; filter:drop-shadow(0 0 6px rgba(255,138,76,0.55)) drop-shadow(0 0 6px rgba(92,225,230,0.55)); animation:core-pulse 3.2s ease-in-out infinite; }
+
+  .spoke-line{ stroke:rgba(139,124,255,0.22); stroke-width:1; transition:stroke .3s ease; }
+
+  .pulse-dot{ opacity:0; animation:travel-pulse 2.8s linear infinite; animation-delay:var(--pd,0s); filter:drop-shadow(0 0 4px currentColor); }
+  @keyframes travel-pulse{
+    0%{ transform:translate(0,0); opacity:0; }
+    10%{ opacity:1; }
+    88%{ opacity:1; }
+    100%{ transform:translate(var(--dx), var(--dy)); opacity:0; }
+  }
+
+  .node-halo{ transform-box:fill-box; transform-origin:center; animation:node-twinkle 2.6s ease-in-out infinite; animation-delay:var(--nd,0s); }
+  @keyframes node-twinkle{ 0%,100%{ transform:scale(0.85); opacity:0.22; } 50%{ transform:scale(1.55); opacity:0.5; } }
+
+  .node-dot{ transform-box:fill-box; transform-origin:center; transition:transform .25s ease, filter .25s ease; }
+  .const-node-label{ font-family:var(--font-mono); font-size:9.5px; fill:var(--text-muted); paint-order:stroke; stroke:#0a0616; stroke-width:3px; stroke-linejoin:round; transition:fill .25s ease, font-weight .25s ease; }
+
+  .node-group{
+    opacity:0; transform:scale(0.4); transform-box:fill-box; transform-origin:center;
+    transition:opacity .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); transition-delay:var(--gd,0s);
+  }
+  .node-group.in{ opacity:1; transform:scale(1); }
+  .node-group:hover .node-dot{ transform:scale(1.8); filter:drop-shadow(0 0 9px currentColor); }
+  .node-group:hover .spoke-line{ stroke:rgba(92,225,230,0.7); }
+  .node-group:hover .const-node-label{ fill:var(--text); font-weight:600; }
+
+
+  /* ============ EXPERIENCE ============ */
+  .trajectory{ position:relative; }
+  .trajectory svg.path-line{ position:absolute; left:24px; top:0; height:100%; width:3px; overflow:visible; }
+  .waypoint{ position:relative; padding-left:76px; margin-bottom:64px; }
+  .waypoint:last-child{ margin-bottom:0; }
+  .waypoint-marker{ position:absolute; left:10px; top:2px; width:30px; height:30px; box-shadow:0 0 0 5px var(--void), 0 0 20px rgba(92,225,230,0.55); }
+  .waypoint-id{ font-family:var(--font-mono); font-size:11px; letter-spacing:0.15em; color:var(--accretion-hot); margin-bottom:8px; display:block; }
+  .waypoint-card{ border:1px solid var(--border); border-radius:16px; padding:26px 28px; background:var(--panel); backdrop-filter:blur(6px); }
+  .waypoint-head{ display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px; margin-bottom:6px; }
+  .waypoint-head h3{ font-family:var(--font-display); font-size:20px; font-weight:600; }
+  .waypoint-meta{ font-family:var(--font-mono); font-size:11.5px; color:var(--signal); text-align:right; }
+  .waypoint-company{ color:var(--text-muted); font-size:13.5px; margin-bottom:16px; }
+  .waypoint-card ul{ list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .waypoint-card li{ position:relative; padding-left:22px; color:var(--text-muted); font-size:14.5px; }
+  .waypoint-card li::before{
+    content:''; position:absolute; left:0; top:2px; width:12px; height:12px; border-radius:50%;
+    background-image:url('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+    background-size:240% 100%; box-shadow:inset -1px -1px 2px rgba(0,0,0,0.6);
+  }
+
+  /* ============ PROJECTS ============ */
+  .missions{ display:grid; grid-template-columns:repeat(3, 1fr); gap:18px; }
+  @media (max-width:900px){ .missions{ grid-template-columns:1fr; } }
+  .mission-card{ border:1px solid var(--border); border-radius:18px; background:var(--panel); backdrop-filter:blur(6px); overflow:hidden; cursor:pointer; transition:border-color .3s ease, transform .3s ease; }
+  .mission-card:hover{ border-color:var(--border-bright); transform:translateY(-4px); }
+  .mission-visual{ height:170px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .mission-visual .globe{ width:110px; height:110px; }
+  .mission-visual .globe-saturn-ring{
+    position:absolute; top:50%; left:50%; width:200px; height:56px; transform:translate(-50%,-50%) rotate(-16deg);
+    border:2px solid rgba(255,214,163,0.55); border-radius:50%; pointer-events:none;
+    box-shadow:0 0 12px rgba(255,214,163,0.25);
+  }
+  .mission-body{ padding:20px 22px 24px; }
+  .mission-id{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; display:block; }
+  .mission-body h3{ font-family:var(--font-display); font-size:17px; font-weight:600; margin-bottom:10px; }
+  .mission-body p.summary{ color:var(--text-muted); font-size:13.5px; }
+  .mission-details{ max-height:0; overflow:hidden; transition:max-height .45s ease; }
+  .mission-card.open .mission-details{ max-height:520px; }
+  .mission-details ul{ list-style:none; padding-top:14px; display:flex; flex-direction:column; gap:9px; }
+  .mission-details li{ position:relative; padding-left:20px; color:var(--text-muted); font-size:13px; }
+  .mission-details li::before{
+    content:''; position:absolute; left:0; top:3px; width:10px; height:10px; border-radius:50%;
+    background-image:url('https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg');
+    background-size:240% 100%; box-shadow:inset -1px -1px 2px rgba(0,0,0,0.6);
+  }
+  .expand-cue{ font-family:var(--font-mono); font-size:10px; color:var(--nebula); letter-spacing:0.1em; margin-top:14px; display:inline-block; }
+
+  /* ============ EDUCATION ============ */
+  .moons{ display:grid; grid-template-columns:repeat(2, 1fr); gap:26px; }
+  @media (max-width:760px){ .moons{ grid-template-columns:1fr; } }
+  .moon-card{ border:1px solid var(--border); border-radius:16px; padding:24px; background:var(--panel); display:flex; gap:20px; align-items:center; }
+  .moon-card .moon-icon{ width:58px; height:58px; min-width:58px; }
+  .moon-card h3{ font-family:var(--font-display); font-size:15.5px; font-weight:600; margin-bottom:4px; }
+  .moon-card p{ color:var(--text-muted); font-size:13px; }
+  .moon-card .grade{ font-family:var(--font-mono); color:var(--signal); font-size:12px; margin-top:4px; display:block; }
+
+  /* ============ CONTACT ============ */
+  #contact{ text-align:center; }
+  #contact .section-lede{ margin-left:auto; margin-right:auto; }
+  .beacons{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-top:20px; }
+  .beacon{
+    position:relative; display:flex; flex-direction:column; align-items:center; gap:10px;
+    padding:26px 30px; border:1px solid var(--border); border-radius:16px; background:var(--panel);
+    min-width:170px; text-decoration:none; transition:border-color .3s ease, transform .3s ease;
+  }
+  .beacon:hover{ border-color:var(--signal); transform:translateY(-4px); }
+  .beacon-dot{ width:16px; height:16px; animation:beacon-pulse 2.4s ease-out infinite, earth-spin 26s linear infinite; }
+  @keyframes beacon-pulse{
+    0%{ box-shadow:0 0 0 0 rgba(92,225,230,0.5); } 70%{ box-shadow:0 0 0 16px rgba(92,225,230,0); } 100%{ box-shadow:0 0 0 0 rgba(92,225,230,0); }
+  }
+  .beacon-label{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--text-dim); }
+  .beacon-value{ font-family:var(--font-display); font-size:14.5px; color:var(--text); }
+
+  footer{ text-align:center; padding:50px 0 60px; font-family:var(--font-mono); font-size:11px; color:var(--text-dim); letter-spacing:0.1em; display:flex; flex-direction:column; align-items:center; gap:14px; }
+  footer .earth-icon{ width:20px; height:20px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* ============ RESPONSIVE QA PORTFOLIO LAYER ============ */
+  html{overflow-x:hidden;scroll-behavior:smooth;}
+  body{overflow-x:hidden;}
+  img,svg,canvas{max-width:100%;}
+  .hero-inner,.container{width:100%;box-sizing:border-box;}
+  .hero-btn{min-height:44px;}
+  .mission-card,.beacon,.waypoint-card,.locator,.constellation-card,.moon-card{box-sizing:border-box;}
+
+  @media (max-width: 900px){
+    section{padding:72px 0;}
+    .container{padding-left:24px;padding-right:24px;}
+    #about .about-grid{gap:24px;}
+    .missions{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .moon-card{padding:20px;}
+    .beacons{gap:10px;}
+    .beacon{flex:1 1 180px;min-width:0;}
+  }
+
+  @media (max-width: 700px){
+    section{padding:58px 0;}
+    .container{padding-left:18px;padding-right:18px;}
+    .section-lede{font-size:14px;line-height:1.7;margin-bottom:24px;}
+    h2.section-title{font-size:clamp(28px,8vw,42px);line-height:1.08;}
+
+    #hero{min-height:100svh;padding:92px 18px 55px;box-sizing:border-box;}
+    #blackhole-wrap{width:145vw;height:145vw;max-width:none;max-height:none;top:64%;}
+    .hero-tag{font-size:9px;letter-spacing:.16em;margin-bottom:18px;line-height:1.5;}
+    h1.hero-name{font-size:clamp(42px,14vw,72px);line-height:.94;}
+    .hero-role{font-size:clamp(15px,4.5vw,19px);line-height:1.35;margin-top:14px;}
+    .hero-objective{font-size:13.5px;line-height:1.7;margin-top:22px;padding:13px 14px;}
+    .hero-actions{margin-top:20px;gap:9px;}
+    .hero-btn{font-size:9px;padding:10px 13px;letter-spacing:.06em;}
+    .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 8px;margin-top:28px;padding:14px 10px;}
+    .hero-stat b{font-size:23px;}
+    .hero-stat span{font-size:8px;letter-spacing:.09em;line-height:1.35;display:block;}
+    .scroll-cue{margin-top:38px;font-size:9px;}
+
+    #about .about-grid{grid-template-columns:1fr;gap:24px;}
+    #about p{font-size:14px;line-height:1.75;}
+    .locator{padding:17px 16px;}
+    .locator-row{font-size:10px;padding:10px 0;align-items:flex-start;}
+    .locator-row span:first-child{letter-spacing:.05em;}
+    .locator-row span:last-child{max-width:58%;overflow-wrap:anywhere;}
+
+    .constellations{grid-template-columns:1fr;gap:18px;}
+    .constellation-card{padding:18px 14px 8px;}
+    .constellation-card h3{font-size:15px;}
+    .orbit-stage{margin:0 -6px;}
+    .const-node-label{font-size:10px;}
+
+    .trajectory svg.path-line{left:15px;width:2px;}
+    .waypoint{padding-left:50px;margin-bottom:40px;}
+    .waypoint-marker{left:0;width:30px;height:30px;}
+    .waypoint-id{font-size:9px;letter-spacing:.08em;line-height:1.5;}
+    .waypoint-card{padding:18px 16px;}
+    .waypoint-head{display:block;}
+    .waypoint-head h3{font-size:17px;line-height:1.25;margin-bottom:7px;}
+    .waypoint-meta{font-size:10px;text-align:left;line-height:1.5;}
+    .waypoint-company{font-size:12px;line-height:1.55;margin-bottom:13px;}
+    .waypoint-card ul{gap:9px;}
+    .waypoint-card li{font-size:13px;line-height:1.6;padding-left:18px;}
+    .waypoint-card li::before{width:9px;height:9px;top:5px;}
+
+    .missions{grid-template-columns:1fr;gap:18px;}
+    .mission-visual{height:145px;}
+    .mission-body{padding:17px 17px 20px;}
+    .mission-body h3{font-size:16px;}
+    .mission-body p.summary{font-size:13px;line-height:1.65;}
+    .mission-details li{font-size:12.5px;line-height:1.6;}
+
+    .moons{grid-template-columns:1fr;gap:16px;}
+    .moon-card{padding:17px;gap:14px;align-items:flex-start;}
+    .moon-card .moon-icon{width:48px;height:48px;min-width:48px;}
+    .moon-card h3{font-size:14px;line-height:1.35;}
+    .moon-card p{font-size:12px;line-height:1.55;}
+
+    .beacons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;}
+    .beacon{min-width:0;padding:17px 10px;gap:7px;}
+    .beacon-value{font-size:12px;text-align:center;overflow-wrap:anywhere;}
+    .beacon-label{font-size:8px;letter-spacing:.09em;}
+    footer{padding:38px 18px 45px;font-size:9px;line-height:1.6;}
+  }
+
+  @media (max-width: 390px){
+    .container{padding-left:14px;padding-right:14px;}
+    #hero{padding-left:14px;padding-right:14px;}
+    h1.hero-name{font-size:43px;}
+    .hero-actions{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:330px;margin-left:auto;margin-right:auto;}
+    .hero-btn{width:100%;padding-left:8px;padding-right:8px;}
+    .hero-btn.primary{grid-column:1/-1;}
+    .hero-stats{gap:12px 4px;}
+    .hero-stat b{font-size:21px;}
+    .hero-stat span{font-size:7px;}
+    .waypoint{padding-left:43px;}
+    .waypoint-marker{width:26px;height:26px;}
+    .trajectory svg.path-line{left:12px;}
+    .beacons{grid-template-columns:1fr;}
+  }
+
+  @media (hover:none){
+    .hero-btn:hover,.mission-card:hover,.beacon:hover,.constellation-card:hover{transform:none;}
+  }
+
+  :focus-visible{ outline:2px solid var(--signal); outline-offset:3px; }
+</style>
+<style id="blackhole-visibility-sequence">
+  /* ===== BLACK HOLE / HERO VISIBILITY =====
+     Keep the black hole clearly visible as the visual anchor without letting
+     the text panels cover the accretion disk and photon ring. */
+  #hero{position:relative;overflow:hidden;}
+  #blackhole-wrap{
+    width:min(1180px,118vw);height:min(1180px,118vw);
+    top:50%;left:50%;transform:translate(-50%,-50%);
+    z-index:1;opacity:.92;
+  }
+  .hero-inner{z-index:3;max-width:820px;}
+  .hero-inner::before{
+    inset:28% -4% -2%;
+    background:radial-gradient(ellipse at center,rgba(3,3,8,.28) 0%,rgba(3,3,8,.10) 42%,transparent 72%);
+  }
+  .hero-objective,.hero-stats{
+    background:rgba(5,3,10,.24);
+    backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  }
+  .hero-tag,.hero-name,.hero-role,.hero-objective,.hero-stats,.hero-actions,.scroll-cue{position:relative;}
+  .hero-tag,.hero-name,.hero-role,.hero-objective,.hero-stats,.hero-actions,.scroll-cue{z-index:4;}
+
+  /* Tighter career sequence: current role first, then previous roles. */
+  .waypoint{margin-bottom:28px;}
+  .waypoint-card{padding:22px 24px;}
+  .trajectory .waypoint + .waypoint{margin-top:0;}
+
+  @media (max-width:900px){
+    #blackhole-wrap{width:min(1050px,145vw);height:min(1050px,145vw);top:48%;}
+    .hero-inner{max-width:760px;}
+  }
+  @media (max-width:700px){
+    #blackhole-wrap{width:135vw;height:135vw;top:44%;opacity:.78;}
+    .hero-inner::before{inset:22% -8% -4%;}
+    .hero-objective,.hero-stats{background:rgba(5,3,10,.42);}
+    .waypoint{padding-left:62px;margin-bottom:20px;}
+    .waypoint-card{padding:18px 18px;}
+  }
+</style>
+<style id="hero-final-mobile-fit">
+  /* Final hero composition: keep the black hole visible as a backdrop, not through the text. */
+  #blackhole-wrap{
+    width:min(1250px,125vw);
+    height:min(1250px,125vw);
+    top:64%;
+    opacity:.96;
+    z-index:1;
+  }
+  .hero-inner::before{
+    inset:18% -3% 4%;
+    background:radial-gradient(ellipse at center,rgba(3,3,8,.16) 0%,rgba(3,3,8,.06) 38%,transparent 68%);
+  }
+  .hero-objective,.hero-stats{
+    background:rgba(5,3,10,.68);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+  }
+  @media (max-width:900px){
+    #blackhole-wrap{
+      width:115vw;
+      height:115vw;
+      top:67%;
+      opacity:.96;
+    }
+  }
+  @media (max-width:700px){
+    #hero{
+      min-height:100svh;
+      padding-top:88px;
+      padding-bottom:42px;
+    }
+    #blackhole-wrap{
+      width:108vw;
+      height:108vw;
+      top:70%;
+      opacity:.98;
+    }
+    .hero-inner{
+      max-width:100%;
+    }
+    .hero-tag{margin-bottom:14px;}
+    h1.hero-name{line-height:.9;}
+    .hero-role{margin-top:12px;}
+    .hero-objective{
+      margin-top:18px;
+      padding:12px 14px;
+      line-height:1.58;
+    }
+    .hero-stats{
+      margin-top:18px;
+      padding:13px 10px;
+      gap:12px 6px;
+    }
+    .scroll-cue{margin-top:42px;}
+    .hero-actions-bottom{margin-top:18px;}
+  }
+  @media (max-width:390px){
+    #blackhole-wrap{width:104vw;height:104vw;top:71%;}
+    .hero-objective{font-size:13px;line-height:1.52;}
+    .hero-stats{margin-top:16px;}
+    .scroll-cue{margin-top:34px;}
+  }
+</style>
+
+<style id="hero-hole-flow-fix">
+  /* Keep the text unchanged above the black hole; place cards and CTAs below it. */
+  #hero{
+    min-height:100svh;
+    padding-top:88px;
+    padding-bottom:72px;
+  }
+  .hero-inner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .hero-tag,.hero-name,.hero-role,.hero-objective{
+    flex:0 0 auto;
+  }
+  .hero-below-hole{
+    width:min(900px,100%);
+    margin-top:clamp(330px,34vw,470px);
+    position:relative;
+    z-index:5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .hero-below-hole .hero-stats{
+    width:100%;
+    box-sizing:border-box;
+    margin-top:0;
+  }
+  .hero-below-hole .hero-actions-bottom{
+    margin-top:20px;
+  }
+  .hero-below-hole .scroll-cue{
+    margin-top:30px;
+    order:3;
+  }
+  #blackhole-wrap{
+    top:55%;
+    width:min(1050px,120vw);
+    height:min(1050px,120vw);
+    z-index:1;
+    opacity:.98;
+  }
+  .hero-inner::before{z-index:0;}
+
+  @media (max-width:900px){
+    #hero{padding-top:86px;padding-bottom:60px;}
+    #blackhole-wrap{width:105vw;height:105vw;top:55%;}
+    .hero-below-hole{margin-top:clamp(300px,38vw,390px);}
+  }
+
+  @media (max-width:700px){
+    #hero{
+      min-height:auto;
+      padding:86px 18px 58px;
+    }
+    #blackhole-wrap{
+      width:104vw;
+      height:104vw;
+      top:54%;
+      opacity:1;
+    }
+    .hero-below-hole{
+      width:100%;
+      margin-top:clamp(300px,88vw,370px);
+    }
+    .hero-below-hole .hero-stats{
+      margin-top:0;
+    }
+    .hero-below-hole .hero-actions-bottom{
+      margin-top:18px;
+    }
+    .hero-below-hole .scroll-cue{
+      margin-top:30px;
+    }
+  }
+
+  @media (max-width:390px){
+    #blackhole-wrap{width:100vw;height:100vw;top:53%;}
+    .hero-below-hole{margin-top:clamp(285px,86vw,345px);}
+  }
+</style>
+</head>
+<body>
+<canvas id="stars-canvas"></canvas>
+<div class="veil"></div>
+<!-- Hidden SVG filters for vector-resolution Mars / Neptune surfaces -->
+<svg aria-hidden="true" class="defs-only">
+<filter height="140%" id="marsNoise" width="140%" x="-20%" y="-20%">
+<feturbulence basefrequency="0.018 0.03" numoctaves="5" result="n" seed="11" type="fractalNoise"></feturbulence>
+<fecolormatrix in="n" result="marsColor" type="matrix" values="
+      1.1 0.1 0   0 0.30
+      0.35 0.15 0 0 0.10
+      0.15 0.05 0 0 0.04
+      0    0   0  0 1"></fecolormatrix>
+<fecomponenttransfer in="marsColor">
+<fefunca intercept="0" slope="1" type="linear"></fefunca>
+</fecomponenttransfer>
+</filter>
+<filter height="140%" id="neptuneNoise" width="140%" x="-20%" y="-20%">
+<feturbulence basefrequency="0.004 0.09" numoctaves="4" result="n" seed="4" type="turbulence"></feturbulence>
+<fecolormatrix in="n" result="nepColor" type="matrix" values="
+      0.05 0   0.2 0 0.08
+      0.1  0.1 0.35 0 0.20
+      0.25 0.2 0.55 0 0.55
+      0    0   0    0 1"></fecolormatrix>
+</filter>
+</svg>
+<nav id="orbit-nav">
+<a class="active" data-label="Launch" href="#hero"><span class="earth-icon"></span></a>
+<a data-label="Flight Log" href="#about"><span class="earth-icon"></span></a>
+<a data-label="Instrumentation" href="#skills"><span class="earth-icon"></span></a>
+<a data-label="Trajectory" href="#experience"><span class="earth-icon"></span></a>
+<a data-label="QA Evidence" href="#evidence"><span class="earth-icon"></span></a>
+<a data-label="Missions" href="#projects"><span class="earth-icon"></span></a>
+<a data-label="Origin" href="#education"><span class="earth-icon"></span></a>
+<a data-label="Channel" href="#contact"><span class="earth-icon"></span></a>
+</nav>
+<!-- ================= HERO ================= -->
+<section id="hero">
+<div id="blackhole-wrap"><canvas id="blackhole-canvas"></canvas></div>
+<div class="hero-inner">
+<div class="hero-tag">Quality Assurance Engineer · Rajkot, India</div>
+<h1 class="hero-name">RISHABH<br/>SOLANKI</h1>
+<p class="hero-role">QA Engineer | Manual Testing | Web &amp; Mobile | API Testing</p>
+<p class="hero-objective">Detail-oriented QA professional with 3+ years validating web and mobile
+      platforms — from manual test design to API verification — built on one rule: nothing ships
+      until it's been pulled apart and put back together.</p>
+<div class="hero-below-hole">
+<div class="hero-stats">
+<div class="hero-stat"><b>3+</b><span>Years in QA</span></div>
+<div class="hero-stat"><b>Web</b><span>QA coverage</span></div>
+<div class="hero-stat"><b>3</b><span>Web · Android · iOS</span></div>
+<div class="hero-stat"><b>8+</b><span>QA tools &amp; platforms</span></div>
+</div>
+<div class="hero-actions hero-actions-bottom">
+<a class="hero-btn primary" download="" href="Rishabh_QA.pdf">Download Resume</a>
+<a class="hero-btn" href="#projects">View Projects</a>
+<a class="hero-btn" href="#contact">Contact Me</a>
+</div>
+<div class="scroll-cue"><span>Begin descent</span><div class="line"></div></div>
+</div>
+</div>
+</section>
+<!-- ================= ABOUT ================= -->
+<section id="about">
+<div class="container reveal">
+<div class="eyebrow">Flight Log</div>
+<h2 class="section-title">About the observer</h2>
+<div class="about-grid">
+<div>
+<p>I'm a <b>Quality Assurance engineer</b> based in Rajkot, Gujarat, currently testing a
+          multi-role exam platform used by students and trainers preparing for PTE, IELTS, and
+          other language certifications. My job is to find the failure before a user does.</p>
+<p>Over three years I've moved from writing my first test case to owning end-to-end
+          validation across <b>web, Android, and iOS</b> — covering role-based access control,
+          real-time data sync, API integrity, and cross-browser behaviour under real-world
+          conditions.</p>
+<p>I work close to the build: logging defects in <b>GitLab, JIRA, and ClickUp</b>,
+          collaborating directly with developers, and treating every regression pass as a chance
+          to tighten the system before release.</p>
+</div>
+<div class="locator">
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Current post</span><span>Bitnet Infotech</span></div>
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Role</span><span>QA Engineer</span></div>
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Since</span><span>Oct 2024</span></div>
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Location</span><span>Rajkot, Gujarat</span></div>
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Contact</span><span>+91 87803 97258</span></div>
+<div class="locator-row"><span><span class="earth-icon" style="width:12px;height:12px;"></span>Email</span><span>rishabhsolanki319@gmail.com</span></div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= SKILLS ================= -->
+<section id="skills">
+<div class="container reveal">
+<div class="eyebrow">Instrumentation</div>
+<h2 class="section-title">Tools on the console</h2>
+<p class="section-lede">A practical QA toolkit covering test design, defect tracking, API validation, cross-browser testing,
+      documentation, and Agile delivery.</p>
+<div class="constellations" id="constellations"></div>
+</div>
+</section>
+<!-- ================= EXPERIENCE ================= -->
+<section id="experience">
+<div class="container reveal">
+<div class="eyebrow">Trajectory</div>
+<h2 class="section-title">Career flight path</h2>
+<p class="section-lede">Three waypoints, logged in order — each one a system that had to hold
+      together under real traffic before it was cleared for launch.</p>
+<div class="trajectory">
+<svg class="path-line" preserveaspectratio="none"><line id="traj-line" stroke="url(#tgrad)" stroke-dasharray="1400" stroke-dashoffset="1400" stroke-width="2" x1="1.5" x2="1.5" y1="0" y2="100%"></line><defs><lineargradient id="tgrad" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#8b7cff"></stop><stop offset="100%" stop-color="#ff8a4c"></stop></lineargradient></defs></svg>
+
+
+
+<div class="waypoint">
+<span class="earth-icon waypoint-marker"></span>
+<span class="waypoint-id">WAYPOINT 01 · OCT 2024 — PRESENT</span>
+<div class="waypoint-card">
+<div class="waypoint-head"><h3>Quality Assurance Engineer</h3><div class="waypoint-meta">Bitnet Infotech</div></div>
+<div class="waypoint-company">Rajkot, Gujarat — Abroad Study Exam Website (PTE/IELTS/Language Cert)</div>
+<ul>
+<li>Ran end-to-end testing across a multi-role platform (Super Admin, Trainer, Student)
+              with strict role-based access control.</li>
+<li>Validated manual scoring and real-time result updates for Trainer Mode across web,
+              Android, and iOS.</li>
+<li>Tracked complex defects via GitLab &amp; ClickUp, improving release confidence through structured regression testing, defect tracking,
+              and close collaboration with developers.</li>
+<li>Executed cross-browser and responsive testing across desktop, tablet, and mobile.</li>
+</ul>
+</div>
+</div><div class="waypoint">
+<span class="earth-icon waypoint-marker"></span>
+<span class="waypoint-id">WAYPOINT 02 · NOV 2022–MAR 2024</span>
+<div class="waypoint-card">
+<div class="waypoint-head"><h3>QA Tester</h3><div class="waypoint-meta">DI Solutions</div></div>
+<div class="waypoint-company">Surat, Gujarat</div>
+<ul>
+<li>Conducted API testing with Postman to validate backend services and data integrity.</li>
+<li>Logged and tracked defects in JIRA, working closely with developers and analysts
+              toward swift resolution.</li>
+<li>Authored detailed test cases from user stories and business requirements.</li>
+<li>Ran daily stand-ups, sprint planning, and retrospectives inside an Agile team.</li>
+</ul>
+</div>
+</div><div class="waypoint">
+<span class="earth-icon waypoint-marker"></span>
+<span class="waypoint-id">WAYPOINT 03 · AUG–SEP 2022</span>
+<div class="waypoint-card">
+<div class="waypoint-head"><h3>QA Manual Tester</h3><div class="waypoint-meta">Kvalitat Technologies LLP</div></div>
+<div class="waypoint-company">Surat, Gujarat — training deployment</div>
+<ul>
+<li>Completed a 2-month intensive manual testing program, mastering test case
+              development, scenario creation, and defect logging.</li>
+<li>Gained hands-on foundation with Azure DevOps, Postman, BrowserStack, and TestRail.</li>
+</ul>
+</div>
+</div></div>
+</div>
+</section>
+<!-- ================= QA EVIDENCE ================= -->
+<section id="evidence">
+<div class="container reveal">
+<div class="eyebrow">Proof of Practice</div>
+<h2 class="section-title">How I test</h2>
+<p class="section-lede">A recruiter should be able to see the way I approach quality, not just the names of my tools.</p>
+<div class="constellations">
+<div class="constellation-card"><h3>Test Design</h3><span class="cluster-label">Coverage</span><p>Requirement analysis, test scenarios, test cases, positive/negative flows, regression and integration coverage.</p></div>
+<div class="constellation-card"><h3>Defect Lifecycle</h3><span class="cluster-label">Traceability</span><p>Clear reproduction steps, severity/priority, evidence, retesting, regression impact and closure tracking.</p></div>
+<div class="constellation-card"><h3>API Verification</h3><span class="cluster-label">Postman</span><p>Validate requests, responses, status codes, payloads, data consistency and backend behaviour.</p></div>
+<div class="constellation-card"><h3>Release Confidence</h3><span class="cluster-label">Quality gates</span><p>Smoke checks, regression cycles, cross-browser/responsive validation and business-flow verification before release.</p></div>
+</div>
+</div>
+</section>
+<!-- ================= PROJECTS ================= -->
+<section id="projects">
+<div class="container reveal">
+<div class="eyebrow">Missions</div>
+<h2 class="section-title">Worlds tested</h2>
+<p class="section-lede">Three systems, three sets of stakes, each rendered as the real planet
+      its story rhymes with. Tap one to open the mission report.</p>
+<div class="missions">
+<div class="mission-card">
+<div class="mission-visual">
+<div class="globe globe-earth">
+<div class="g-texture"></div>
+<div class="g-clouds"></div>
+<div class="g-shade"></div>
+</div>
+</div>
+<div class="mission-body">
+<span class="mission-id">MISSION 01 · EARTH · EDUCATION PLATFORM</span>
+<h3>Abroad Study Exam Website</h3>
+<p class="summary">Multi-role PTE/IELTS testing platform for Super Admins, Partners,
+            White Label users, Trainers, and Students — a world with a lot of people on it.</p>
+<div class="mission-details">
+<ul>
+<li>Executed end-to-end manual, cross-browser, and responsive testing across
+                desktop, tablet, Android, and iOS.</li>
+<li>Validated role-based access and panel configuration — system-wide controls for
+                Super Admin, white-label &amp; data management for Partners, scheduling for Users.</li>
+<li>Tested Trainer Mode for manual scoring, feedback input, and real-time result
+                synchronization.</li>
+<li>Logged and tracked bugs in close collaboration with developers.</li>
+</ul>
+</div>
+<span class="expand-cue">+ Open mission report</span>
+</div>
+</div>
+<div class="mission-card">
+<div class="mission-visual">
+<div class="globe globe-mars">
+<div class="g-texture"><svg height="100%" width="100%"><rect fill="#c1571f" filter="url(#marsNoise)" height="100%" width="100%"></rect></svg></div>
+<div class="g-shade"></div>
+</div>
+</div>
+<div class="mission-body">
+<span class="mission-id">MISSION 02 · MARS · LOGISTICS PLATFORM</span>
+<h3>Transportation Website</h3>
+<p class="summary">Container management system with real-time tracking and multi-panel
+            access — rugged terrain, heavy loads, real exploration logic.</p>
+<div class="mission-details">
+<ul>
+<li>Developed and executed automated test scripts with Selenium for the container
+                booking module.</li>
+<li>Ran performance testing to evaluate system responsiveness under heavy traffic
+                and large data loads.</li>
+<li>Led testing for live location tracking to confirm real-time accuracy.</li>
+<li>Validated data sync between Admin, Documentation, and Marketing panels and the
+                central database.</li>
+<li>Facilitated UAT with key stakeholders to confirm business requirements.</li>
+</ul>
+</div>
+<span class="expand-cue">+ Open mission report</span>
+</div>
+</div>
+<div class="mission-card">
+<div class="mission-visual">
+<div class="globe globe-neptune">
+<div class="g-texture"><svg height="100%" width="100%"><rect fill="#1c4f8f" filter="url(#neptuneNoise)" height="100%" width="100%"></rect></svg></div>
+<div class="g-shade"></div>
+</div>
+</div>
+<div class="mission-body">
+<span class="mission-id">MISSION 03 · NEPTUNE · HARDWARE INTEGRATION</span>
+<h3>Scuba Diving Application</h3>
+<p class="summary">Depth, pressure &amp; temperature tracking via Universal Pro and
+            Diveroid Mini, synced to a mobile app — an ice-giant, all water and pressure.</p>
+<div class="mission-details">
+<ul>
+<li>Analyzed complex business requirements to prepare detailed test plans and
+                scenarios.</li>
+<li>Led test case creation for mobile-hardware integration to ensure seamless
+                connectivity.</li>
+<li>Conducted integration, system, and device compatibility testing.</li>
+<li>Managed end-to-end testing, including defect tracking and prioritization in
+                JIRA.</li>
+</ul>
+</div>
+<span class="expand-cue">+ Open mission report</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= EDUCATION ================= -->
+<section id="education">
+<div class="container reveal">
+<div class="eyebrow">Origin Coordinates</div>
+<h2 class="section-title">Where the trajectory started</h2>
+<div class="moons">
+<div class="moon-card">
+<span class="moon-icon"></span>
+<div>
+<h3>B.E. Electronics &amp; Communication</h3>
+<p>Gujarat Technological University · Jul 2019 – Jul 2022</p>
+<span class="grade">CGPA 7.88</span>
+</div>
+</div>
+<div class="moon-card">
+<span class="moon-icon"></span>
+<div>
+<h3>Diploma, Electronics &amp; Communication</h3>
+<p>Gujarat Technological University · Jul 2016 – Jul 2019</p>
+<span class="grade">CGPA 6.4</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= CONTACT ================= -->
+<section id="contact">
+<div class="container reveal">
+<div class="eyebrow">Open Channel</div>
+<h2 class="section-title">Send a transmission</h2>
+<p class="section-lede">Open to QA opportunities — automation, API validation, or full-cycle
+      manual testing. Reach out through any beacon below.</p>
+<div class="beacons">
+<a class="beacon" href="mailto:rishabhsolanki319@gmail.com">
+<span class="earth-icon beacon-dot"></span>
+<span class="beacon-label">Email</span>
+<span class="beacon-value">rishabhsolanki319@gmail.com</span>
+</a>
+<a class="beacon" href="tel:+918780397258">
+<span class="earth-icon beacon-dot"></span>
+<span class="beacon-label">Phone</span>
+<span class="beacon-value">+91 87803 97258</span>
+</a>
+<a class="beacon" href="https://linkedin.com/in/rishabh-solanki-1a1724230" rel="noopener" target="_blank">
+<span class="earth-icon beacon-dot"></span>
+<span class="beacon-label">LinkedIn</span>
+<span class="beacon-value">/rishabh-solanki</span>
+</a>
+</div>
+</div>
+</section>
+<footer><span class="earth-icon"></span>Transmission ends // Rishabh Solanki, 2026</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- STARFIELD ---------- */
+  const starsCanvas = document.getElementById('stars-canvas');
+  const sctx = starsCanvas.getContext('2d');
+  let W, H, stars = [], nebulaBlobs = [];
+
+  function resizeStars(){
+    W = starsCanvas.width = window.innerWidth;
+    H = starsCanvas.height = document.documentElement.scrollHeight;
+  }
+  function initStars(){
+    stars = [];
+    const count = Math.floor((W*H)/8500);
+    for(let i=0;i<count;i++){
+      stars.push({ x: Math.random()*W, y: Math.random()*H, r: Math.random()*1.5 + 0.3,
+        phase: Math.random()*Math.PI*2, speed: Math.random()*0.015 + 0.005 });
+    }
+    nebulaBlobs = [
+      {x:W*0.15, y:H*0.1, r: Math.max(W,600)*0.35, color:'139,124,255', drift:0.02},
+      {x:W*0.85, y:H*0.4, r: Math.max(W,600)*0.3, color:'92,225,230', drift:0.015},
+      {x:W*0.3, y:H*0.75, r: Math.max(W,600)*0.28, color:'255,138,76', drift:0.01}
+    ];
+  }
+  let t = 0;
+  function drawStars(){
+    t += 1;
+    sctx.clearRect(0,0,W,H);
+    sctx.fillStyle = '#030308';
+    sctx.fillRect(0,0,W,H);
+    const scrollY = window.scrollY;
+    nebulaBlobs.forEach(b=>{
+      const grad = sctx.createRadialGradient(b.x, b.y + scrollY*b.drift, 0, b.x, b.y + scrollY*b.drift, b.r);
+      grad.addColorStop(0, `rgba(${b.color},0.10)`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      sctx.fillStyle = grad;
+      sctx.beginPath();
+      sctx.arc(b.x, b.y + scrollY*b.drift, b.r, 0, Math.PI*2);
+      sctx.fill();
+    });
+    stars.forEach(s=>{
+      const twinkle = reduced ? 0.8 : (Math.sin(t*s.speed + s.phase)*0.4 + 0.6);
+      sctx.beginPath();
+      sctx.fillStyle = `rgba(241,239,255,${twinkle})`;
+      sctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      sctx.fill();
+    });
+    requestAnimationFrame(drawStars);
+  }
+  resizeStars(); initStars(); drawStars();
+  window.addEventListener('resize', ()=>{ resizeStars(); initStars(); });
+  window.addEventListener('load', ()=>{ resizeStars(); initStars(); });
+
+  /* ---------- REAL 3D BLACK HOLE (three.js WebGL: lit geometry, wide textured accretion disk, layered photon rings, jets, swirling debris, hotspots) ---------- */
+  const bhWrap = document.getElementById('blackhole-wrap');
+  const bhCanvas = document.getElementById('blackhole-canvas');
+  let mouseNX = 0, mouseNY = 0; // normalized -1..1
+
+  let bhRenderer, bhScene, bhCamera, bhGroup, bhDisk, bhDisk2, bhDisk3, bhPhotonRing, bhPhotonRing2, bhGlow, bhSwirl, bhHotspotGroup, bhHotspots, bhClock;
+  let bhReady = false;
+
+  function initBlackHole3D(){
+    if(typeof THREE === 'undefined') return; // graceful no-op if the CDN is blocked
+
+    bhRenderer = new THREE.WebGLRenderer({ canvas: bhCanvas, antialias:true, alpha:true });
+    bhRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if(bhRenderer.outputEncoding !== undefined) bhRenderer.outputEncoding = THREE.sRGBEncoding;
+    if(bhRenderer.toneMapping !== undefined) bhRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+    bhScene = new THREE.Scene();
+    bhCamera = new THREE.PerspectiveCamera(46, 1, 0.1, 400);
+    bhCamera.position.set(0, 4.4, 33);
+    bhCamera.lookAt(0, 0, 0);
+
+    bhScene.add(new THREE.AmbientLight(0x33224d, 1.1));
+    const ember = new THREE.PointLight(0xffb15c, 4.6, 100, 2);
+    ember.position.set(0, 0, 0);
+    bhScene.add(ember);
+    const rim = new THREE.PointLight(0x5ce1e6, 1.6, 120, 2);
+    rim.position.set(-22, 14, 28);
+    bhScene.add(rim);
+    const fill = new THREE.PointLight(0xb49cff, 0.9, 140, 2);
+    fill.position.set(24, -10, 20);
+    bhScene.add(fill);
+
+    bhGroup = new THREE.Group();
+    bhScene.add(bhGroup);
+
+    // event horizon -- true, unlit black sphere
+    const horizon = new THREE.Mesh(
+      new THREE.SphereGeometry(3.6, 64, 64),
+      new THREE.MeshBasicMaterial({ color: 0x000000 })
+    );
+    bhGroup.add(horizon);
+
+    // procedural accretion-disk texture: real radial heat gradient, a bright ISCO band, turbulence streaks & soft clumps
+    function makeDiskTexture(){
+      const c = document.createElement('canvas');
+      c.width = 1024; c.height = 1024;
+      const cx = c.getContext('2d');
+      const grad = cx.createRadialGradient(512,512,110,512,512,512);
+      grad.addColorStop(0.00, 'rgba(255,246,225,0.0)');
+      grad.addColorStop(0.10, 'rgba(255,250,235,0.98)');
+      grad.addColorStop(0.16, 'rgba(255,235,190,0.95)');
+      grad.addColorStop(0.30, 'rgba(255,190,120,0.88)');
+      grad.addColorStop(0.48, 'rgba(255,130,75,0.6)');
+      grad.addColorStop(0.68, 'rgba(210,95,110,0.36)');
+      grad.addColorStop(0.85, 'rgba(139,90,180,0.16)');
+      grad.addColorStop(1.00, 'rgba(139,90,180,0)');
+      cx.fillStyle = grad;
+      cx.fillRect(0,0,1024,1024);
+      // turbulent filament streaks
+      cx.globalCompositeOperation = 'overlay';
+      for(let i=0;i<340;i++){
+        const ang = Math.random()*Math.PI*2;
+        const r1 = 130 + Math.random()*370;
+        const len = 16 + Math.random()*90;
+        cx.strokeStyle = `rgba(255,255,255,${Math.random()*0.17})`;
+        cx.lineWidth = 1 + Math.random()*2.4;
+        cx.beginPath();
+        cx.arc(512,512,r1, ang, ang+len/r1);
+        cx.stroke();
+      }
+      // soft turbulent plasma clumps
+      cx.globalCompositeOperation = 'lighter';
+      for(let i=0;i<46;i++){
+        const ang = Math.random()*Math.PI*2;
+        const r1 = 140 + Math.random()*380;
+        const bx = 512 + Math.cos(ang)*r1, by = 512 + Math.sin(ang)*r1;
+        const rad = 18 + Math.random()*46;
+        const cg = cx.createRadialGradient(bx,by,0,bx,by,rad);
+        cg.addColorStop(0, `rgba(255,${200+Math.random()*40|0},${140+Math.random()*60|0},${0.08+Math.random()*0.1})`);
+        cg.addColorStop(1, 'rgba(255,180,120,0)');
+        cx.fillStyle = cg;
+        cx.beginPath();
+        cx.arc(bx,by,rad,0,Math.PI*2);
+        cx.fill();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+    // cooler, fainter outer-dust texture for the far edge of the disk
+    function makeDustTexture(){
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const cx = c.getContext('2d');
+      const grad = cx.createRadialGradient(256,256,40,256,256,256);
+      grad.addColorStop(0.00, 'rgba(180,150,255,0.35)');
+      grad.addColorStop(0.45, 'rgba(120,110,200,0.18)');
+      grad.addColorStop(0.8, 'rgba(90,80,160,0.07)');
+      grad.addColorStop(1.00, 'rgba(90,80,160,0)');
+      cx.fillStyle = grad;
+      cx.fillRect(0,0,512,512);
+      cx.globalCompositeOperation = 'overlay';
+      for(let i=0;i<90;i++){
+        const ang = Math.random()*Math.PI*2;
+        const r1 = 60 + Math.random()*190;
+        const len = 8 + Math.random()*30;
+        cx.strokeStyle = `rgba(255,255,255,${Math.random()*0.08})`;
+        cx.lineWidth = 1 + Math.random()*1.6;
+        cx.beginPath();
+        cx.arc(256,256,r1, ang, ang+len/r1);
+        cx.stroke();
+      }
+      return new THREE.CanvasTexture(c);
+    }
+
+    function radialUVs(geo, rInner, rOuter){
+      const uvAttr = geo.attributes.uv;
+      const posAttr = geo.attributes.position;
+      for(let i=0;i<posAttr.count;i++){
+        const x = posAttr.getX(i), y = posAttr.getY(i);
+        const r = Math.sqrt(x*x + y*y);
+        const rNorm = (r - rInner) / (rOuter - rInner);
+        const ang = Math.atan2(y, x);
+        uvAttr.setXY(i, 0.5 + Math.cos(ang)*rNorm*0.5, 0.5 + Math.sin(ang)*rNorm*0.5);
+      }
+    }
+
+    // primary disk -- now spread wide, edge to edge across the frame
+    const diskTex = makeDiskTexture();
+    const diskGeo = new THREE.RingGeometry(4.3, 24, 160);
+    radialUVs(diskGeo, 4.3, 24);
+    const diskMat = new THREE.MeshBasicMaterial({
+      map: diskTex, side: THREE.DoubleSide, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    bhDisk = new THREE.Mesh(diskGeo, diskMat);
+    bhDisk.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhDisk);
+
+    // second, smaller counter-rotating disk layer for turbulent depth
+    bhDisk2 = bhDisk.clone();
+    bhDisk2.scale.set(0.55, 0.55, 0.55);
+    bhDisk2.rotation.x = Math.PI / 2.1;
+    bhDisk2.rotation.z = 1.15;
+    bhGroup.add(bhDisk2);
+
+    // third layer -- faint, wide dust ring that pushes the whole structure further out toward the frame edges
+    const dustGeo = new THREE.RingGeometry(20, 34, 160);
+    radialUVs(dustGeo, 20, 34);
+    const dustMat = new THREE.MeshBasicMaterial({
+      map: makeDustTexture(), side: THREE.DoubleSide, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.6
+    });
+    bhDisk3 = new THREE.Mesh(dustGeo, dustMat);
+    bhDisk3.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhDisk3);
+
+    // swirling debris/gas motes riding along the disk band
+    const swirlCount = reduced ? 220 : 900;
+    const swirlGeo = new THREE.BufferGeometry();
+    const swirlPos = new Float32Array(swirlCount*3);
+    const swirlCol = new Float32Array(swirlCount*3);
+    for(let i=0;i<swirlCount;i++){
+      const ang = Math.random()*Math.PI*2;
+      const r1 = 4.6 + Math.random()*18.5;
+      swirlPos[i*3]   = Math.cos(ang)*r1;
+      swirlPos[i*3+1] = Math.sin(ang)*r1;
+      swirlPos[i*3+2] = (Math.random()-0.5)*0.25;
+      const heat = Math.max(0, 1 - (r1-4.6)/18.5);
+      swirlCol[i*3]   = 1.0;
+      swirlCol[i*3+1] = 0.55 + heat*0.4;
+      swirlCol[i*3+2] = 0.35 + (1-heat)*0.4;
+    }
+    swirlGeo.setAttribute('position', new THREE.BufferAttribute(swirlPos, 3));
+    swirlGeo.setAttribute('color', new THREE.BufferAttribute(swirlCol, 3));
+    const swirlMat = new THREE.PointsMaterial({
+      size: 0.16, vertexColors: true, transparent: true, opacity: 0.85,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+    });
+    bhSwirl = new THREE.Points(swirlGeo, swirlMat);
+    bhSwirl.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhSwirl);
+
+    // photon ring -- thin bright torus hugging the shadow (the lensed "Einstein ring")
+    bhPhotonRing = new THREE.Mesh(
+      new THREE.TorusGeometry(4.05, 0.06, 20, 160),
+      new THREE.MeshBasicMaterial({ color: 0xffe9c2, transparent: true, opacity: 0.92, blending: THREE.AdditiveBlending })
+    );
+    bhPhotonRing.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhPhotonRing);
+
+    // second, fainter lensed ring further out -- extra layer of gravitational-lensing detail
+    bhPhotonRing2 = new THREE.Mesh(
+      new THREE.TorusGeometry(4.95, 0.026, 16, 128),
+      new THREE.MeshBasicMaterial({ color: 0xbcd4ff, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending })
+    );
+    bhPhotonRing2.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhPhotonRing2);
+
+    // small orbiting hotspots along the inner disk edge -- flickering flare detail
+    bhHotspotGroup = new THREE.Group();
+    bhHotspotGroup.rotation.x = Math.PI / 2.3;
+    bhGroup.add(bhHotspotGroup);
+    function makeHotspotTexture(){
+      const c = document.createElement('canvas');
+      c.width = 128; c.height = 128;
+      const cx = c.getContext('2d');
+      const g = cx.createRadialGradient(64,64,0,64,64,64);
+      g.addColorStop(0, 'rgba(255,248,225,0.95)');
+      g.addColorStop(0.4, 'rgba(255,210,150,0.55)');
+      g.addColorStop(1, 'rgba(255,210,150,0)');
+      cx.fillStyle = g;
+      cx.fillRect(0,0,128,128);
+      return new THREE.CanvasTexture(c);
+    }
+    const hotspotTex = makeHotspotTexture();
+    bhHotspots = [];
+    const hsCount = 7;
+    for(let i=0;i<hsCount;i++){
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: hotspotTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+      }));
+      const scale = 0.9 + Math.random()*1.1;
+      sprite.scale.set(scale, scale, 1);
+      bhHotspotGroup.add(sprite);
+      bhHotspots.push({
+        sprite, angle: Math.random()*Math.PI*2, radius: 4.7 + Math.random()*2.2,
+        speed: (0.25 + Math.random()*0.35) * (Math.random()<0.5?1:-1),
+        phase: Math.random()*Math.PI*2
+      });
+    }
+
+    // soft ember glow sprite sitting behind everything
+    function makeGlowTexture(){
+      const c = document.createElement('canvas');
+      c.width = 256; c.height = 256;
+      const cx = c.getContext('2d');
+      const g = cx.createRadialGradient(128,128,0,128,128,128);
+      g.addColorStop(0, 'rgba(255,214,163,0.55)');
+      g.addColorStop(0.5, 'rgba(255,138,76,0.18)');
+      g.addColorStop(1, 'rgba(255,138,76,0)');
+      cx.fillStyle = g;
+      cx.fillRect(0,0,256,256);
+      return new THREE.CanvasTexture(c);
+    }
+    bhGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeGlowTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    bhGlow.scale.set(46, 46, 1);
+    bhGroup.add(bhGlow);
+
+    // twin relativistic jets along the spin axis, thin additive cones
+    function makeJet(dir){
+      const geo = new THREE.ConeGeometry(1.3, 20, 24, 1, true);
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0xcfe0ff, transparent: true, opacity: 0.22,
+        blending: THREE.AdditiveBlending, side: THREE.DoubleSide, depthWrite: false
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.y = dir*9.4;
+      if(dir > 0) mesh.rotation.x = Math.PI;
+      return mesh;
+    }
+    bhGroup.add(makeJet(1));
+    bhGroup.add(makeJet(-1));
+
+    bhClock = new THREE.Clock();
+    resizeBH3D();
+    bhReady = true;
+  }
+
+  function resizeBH3D(){
+    if(!bhRenderer) return;
+    const rect = bhCanvas.getBoundingClientRect();
+    const w = Math.max(1, rect.width), h = Math.max(1, rect.height);
+    bhRenderer.setSize(w, h, false);
+    bhCamera.aspect = w / h;
+    bhCamera.updateProjectionMatrix();
+  }
+
+  function animateBlackHole3D(){
+    if(bhReady){
+      const dt = Math.min(bhClock.getDelta(), 0.05);
+      const spin = reduced ? 0.12 : 1;
+      bhDisk.rotation.z += dt*0.15*spin;
+      bhDisk2.rotation.z -= dt*0.24*spin;
+      bhDisk3.rotation.z += dt*0.045*spin;
+      bhSwirl.rotation.z += dt*0.19*spin;
+      bhPhotonRing.rotation.z += dt*0.1*spin;
+      bhPhotonRing2.rotation.z -= dt*0.06*spin;
+
+      const now = performance.now();
+      bhPhotonRing.material.opacity = 0.82 + Math.sin(now*0.002)*0.1;
+      bhPhotonRing2.material.opacity = 0.32 + Math.sin(now*0.0016 + 1.4)*0.1;
+      const pulse = 1 + Math.sin(now*0.0014)*0.05;
+      bhGlow.scale.set(46*pulse, 46*pulse, 1);
+
+      bhHotspots.forEach(h=>{
+        h.angle += dt*h.speed*spin;
+        h.sprite.position.set(Math.cos(h.angle)*h.radius, Math.sin(h.angle)*h.radius, 0);
+        const flicker = 0.5 + 0.5*Math.sin(now*0.004 + h.phase);
+        h.sprite.material.opacity = 0.4 + flicker*0.6;
+      });
+
+      // mouse-driven parallax: the whole black hole tilts toward the cursor
+      const targetRotY = mouseNX * 0.5;
+      const targetRotX = mouseNY * -0.32;
+      bhGroup.rotation.y += (targetRotY - bhGroup.rotation.y) * 0.04;
+      bhGroup.rotation.x += (targetRotX - bhGroup.rotation.x) * 0.04;
+
+      bhRenderer.render(bhScene, bhCamera);
+    }
+    requestAnimationFrame(animateBlackHole3D);
+  }
+
+  initBlackHole3D();
+  animateBlackHole3D();
+  window.addEventListener('resize', resizeBH3D);
+  document.getElementById('hero').addEventListener('mousemove', (e)=>{
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseNX = ((e.clientX - rect.left)/rect.width - 0.5) * 2;
+    mouseNY = ((e.clientY - rect.top)/rect.height - 0.5) * 2;
+  });
+  document.getElementById('hero').addEventListener('mouseleave', ()=>{ mouseNX = 0; mouseNY = 0; });
+
+  /* ---------- NAV ACTIVE STATE ---------- */
+  const navLinks = document.querySelectorAll('#orbit-nav a');
+  const sections = document.querySelectorAll('section[id]');
+  const navObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        navLinks.forEach(l=>l.classList.remove('active'));
+        const link = document.querySelector(`#orbit-nav a[href="#${entry.target.id}"]`);
+        if(link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  sections.forEach(s=>navObserver.observe(s));
+
+  /* ---------- REVEAL ON SCROLL ---------- */
+  const revealObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add('in'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+  /* ---------- TRAJECTORY LINE DRAW ---------- */
+  const trajLine = document.getElementById('traj-line');
+  const trajectory = document.querySelector('.trajectory');
+  if(trajectory){
+    const trajObserver = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          trajLine.style.transition = 'stroke-dashoffset 2.2s ease';
+          trajLine.style.strokeDashoffset = '0';
+        }
+      });
+    }, { threshold: 0.15 });
+    trajObserver.observe(trajectory);
+  }
+
+  /* ---------- MISSION CARD EXPAND ---------- */
+  document.querySelectorAll('.mission-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const isOpen = card.classList.contains('open');
+      document.querySelectorAll('.mission-card').forEach(c=>c.classList.remove('open'));
+      if(!isOpen) card.classList.add('open');
+      document.querySelectorAll('.expand-cue').forEach(c=>c.textContent = '+ Open mission report');
+      const cue = card.querySelector('.expand-cue');
+      if(card.classList.contains('open') && cue) cue.textContent = '– Close mission report';
+    });
+    card.setAttribute('tabindex','0');
+    card.setAttribute('role','button');
+    card.addEventListener('keypress', (e)=>{ if(e.key==='Enter') card.click(); });
+  });
+
+  /* ---------- SKILL CONSTELLATIONS ---------- */
+  const clusters = [
+    { name:'Testing Methodologies', label:'Method cluster', items:['SDLC','STLC','Agile / Scrum','Smoke','Functional','Integration','System','Regression','UAT'] },
+    { name:'Tools', label:'Instrument cluster', items:['JIRA','GitLab','ClickUp','Azure DevOps','TestRail','Postman','Trello','BrowserStack'] },
+    { name:'Technical Skills', label:'Core cluster', items:['Manual Testing','API Testing (Postman)','UI / UX Testing','Cross-Browser & Responsive'] },
+    { name:'Documentation', label:'Signal cluster', items:['Test Plans','Test Cases','Requirement Traceability Matrix','Bug Reports','Requirement Analysis'] }
+  ];
+  const constellationsEl = document.getElementById('constellations');
+
+  // orbital layout: items split across two radius tiers once a cluster gets crowded (>6 items),
+  // each item riding its own spoke off a pulsing core, with a traveling energy pulse and a twinkling halo.
+  function buildConstellation(cluster, idx){
+    const wrap = document.createElement('div');
+    wrap.className = 'constellation-card';
+    const title = document.createElement('h3'); title.textContent = cluster.name;
+    const label = document.createElement('span'); label.className = 'cluster-label'; label.textContent = cluster.label;
+    wrap.appendChild(title); wrap.appendChild(label);
+
+    const stage = document.createElement('div');
+    stage.className = 'orbit-stage';
+    stage.insertAdjacentHTML('beforeend', '<div class="radar-sweep"></div>');
+
+    const w = 460, h = 232, cx = w/2, cy = h/2 + 4, n = cluster.items.length;
+    const twoTier = n > 6;
+    const tierSplit = twoTier ? Math.ceil(n/2) : n;
+    const rInner = Math.min(w,h)*0.30;
+    const rOuter = Math.min(w,h)*0.46;
+
+    const positions = cluster.items.map((label, i)=>{
+      const tier = twoTier && i >= tierSplit ? 1 : 0;
+      const radius = tier === 0 ? rInner : rOuter;
+      const count = tier === 0 ? tierSplit : (n - tierSplit);
+      const idxInTier = tier === 0 ? i : i - tierSplit;
+      const angle = (Math.PI*2/count)*idxInTier - Math.PI/2 + (tier === 1 ? Math.PI/count : 0);
+      const x = cx + Math.cos(angle)*radius;
+      const y = cy + Math.sin(angle)*radius*0.8;
+      return { x, y, label, tier };
+    });
+
+    const gradId = `coreGlow-${idx}`;
+    const ringId = `coreRing-${idx}`;
+    let svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="${gradId}" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff8a4c" stop-opacity="0.55"/>
+          <stop offset="55%" stop-color="#8b7cff" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="#5ce1e6" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="${ringId}" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#ff8a4c"/>
+          <stop offset="50%" stop-color="#ffe1b8"/>
+          <stop offset="100%" stop-color="#5ce1e6"/>
+        </linearGradient>
+      </defs>
+      <circle class="orbit-ring ring-a" cx="${cx}" cy="${cy}" r="${rInner}"/>
+      ${twoTier ? `<circle class="orbit-ring ring-b" cx="${cx}" cy="${cy}" r="${rOuter}"/>` : ''}`;
+
+    positions.forEach((p, i)=>{
+      const dx = (p.x - cx).toFixed(2), dy = (p.y - cy).toFixed(2);
+
+      // Use the true radial direction (pre vertical-squash) so labels for nodes
+      // near the top/bottom of the ellipse push straight up/down instead of
+      // sitting flush against the dot with only a few px of horizontal offset.
+      const rawAngle = Math.atan2((p.y - cy) / 0.8, p.x - cx);
+      const ux = Math.cos(rawAngle), uy = Math.sin(rawAngle);
+
+      const labelPad = 13; // clearance between node edge and label start
+      const lx = p.x + ux * labelPad;
+      const ly = p.y + uy * labelPad * 0.8;
+
+      let anchor;
+      if (ux > 0.35) anchor = 'start';
+      else if (ux < -0.35) anchor = 'end';
+      else anchor = 'middle';
+
+      let labelY = ly + 3;
+      if (uy < -0.5) labelY = ly - 2;      // node above center -> label sits above the dot
+      else if (uy > 0.5) labelY = ly + 9;  // node below center -> label sits below the dot
+
+      const isEven = i % 2 === 0;
+      const color = isEven ? '#ff8a4c' : '#5ce1e6';
+      const pd = (i * (2.8/positions.length)).toFixed(2);
+      const gd = (i * 0.055).toFixed(2);
+      svg += `<g class="node-group" style="--pd:${pd}s; --nd:${pd}s; --gd:${gd}s;">
+        <line class="spoke-line" x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}"/>
+        <circle class="pulse-dot" cx="${cx}" cy="${cy}" r="2.2" fill="${color}" style="color:${color}; --dx:${dx}px; --dy:${dy}px;"/>
+        <circle class="node-halo" cx="${p.x}" cy="${p.y}" r="9" fill="${color}" opacity="0.32"/>
+        <circle class="node-dot" cx="${p.x}" cy="${p.y}" r="4" fill="${color}" style="color:${color};"/>
+        <text class="const-node-label" x="${lx}" y="${labelY}" text-anchor="${anchor}">${p.label}</text>
+      </g>`;
+    });
+
+    svg += `<circle class="core-halo" cx="${cx}" cy="${cy}" r="18" fill="url(#${gradId})"/>
+      <circle class="core-dot" cx="${cx}" cy="${cy}" r="7"/>
+      <circle class="core-ring" cx="${cx}" cy="${cy}" r="7" stroke="url(#${ringId})"/>
+    </svg>`;
+
+    stage.insertAdjacentHTML('beforeend', svg);
+    wrap.appendChild(stage);
+    return wrap;
+  }
+  clusters.forEach((c, i)=> constellationsEl.appendChild(buildConstellation(c, i)));
+
+  // stagger each cluster's nodes into view once its card scrolls into frame
+  const constellationObserver = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.querySelectorAll('.node-group').forEach(g=> g.classList.add('in'));
+        constellationObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+  document.querySelectorAll('.constellation-card').forEach(el=> constellationObserver.observe(el));
+
+})();
+</script>
+</body>
+</html>
